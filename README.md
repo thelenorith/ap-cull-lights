@@ -67,6 +67,7 @@ python -m ap_cull_light.cull_lights <source_dir> <reject_dir> --max-hfr 2.5 --ma
 - `--skip-regex REGEX`: Regex pattern to skip files/directories (e.g., 'accept' or 'accept|processed' to skip multiple patterns)
 - `--debug`: Enable debug output
 - `--dryrun`: Perform dry run without moving files
+- `-q, --quiet`: Suppress progress output
 - `--help`: Show help message and exit
 
 ## Installation

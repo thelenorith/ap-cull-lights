@@ -101,6 +101,7 @@ def cull_lights(
     skip_pattern: Optional[re.Pattern] = None,
     debug: bool = False,
     dryrun: bool = False,
+    quiet: bool = False,
 ) -> None:
     """
     Cull light frames based on HFR and RMS thresholds.
@@ -114,6 +115,7 @@ def cull_lights(
         skip_pattern: Compiled regex pattern - files matching the pattern will be skipped
         debug: Enable debug output
         dryrun: Perform dry run without actually moving files
+        quiet: Suppress progress output
     """
     # Get metadata for all FITS files
     required_properties: list[str] = (
@@ -127,7 +129,7 @@ def cull_lights(
         filters={"type": "LIGHT"},
         debug=debug,
         profileFromPath=True,
-        printStatus=True,
+        printStatus=not quiet,
     )
 
     # Group files by directory (for batch rejection confirmation)
@@ -310,6 +312,9 @@ def main() -> None:
     parser.add_argument(
         "--dryrun", action="store_true", help="Perform dry run without moving files"
     )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Suppress progress output"
+    )
 
     args = parser.parse_args()
 
@@ -365,6 +370,7 @@ def main() -> None:
         skip_pattern=skip_pattern,
         debug=args.debug,
         dryrun=args.dryrun,
+        quiet=args.quiet,
     )
 
 

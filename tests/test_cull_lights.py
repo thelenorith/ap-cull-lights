@@ -949,3 +949,85 @@ class TestMain:
         ):
             with pytest.raises(SystemExit):
                 cull_lights.main()
+
+    @patch("ap_cull_light.cull_lights.cull_lights")
+    def test_main_with_quiet(self, mock_cull, tmp_path):
+        """Test main with --quiet flag."""
+        source_dir = str(tmp_path / "source")
+        reject_dir = str(tmp_path / "reject")
+        (tmp_path / "source").mkdir()
+
+        with patch(
+            "sys.argv",
+            ["cull_lights.py", source_dir, reject_dir, "--max-hfr", "2.5", "--quiet"],
+        ):
+            cull_lights.main()
+
+        call_kwargs = mock_cull.call_args[1]
+        assert call_kwargs["quiet"] is True
+
+    @patch("ap_cull_light.cull_lights.cull_lights")
+    def test_main_with_quiet_short_flag(self, mock_cull, tmp_path):
+        """Test main with -q short flag."""
+        source_dir = str(tmp_path / "source")
+        reject_dir = str(tmp_path / "reject")
+        (tmp_path / "source").mkdir()
+
+        with patch(
+            "sys.argv",
+            ["cull_lights.py", source_dir, reject_dir, "--max-hfr", "2.5", "-q"],
+        ):
+            cull_lights.main()
+
+        call_kwargs = mock_cull.call_args[1]
+        assert call_kwargs["quiet"] is True
+
+
+class TestCullLightsQuiet:
+    """Tests for quiet parameter in cull_lights function."""
+
+    @patch("ap_common.get_filtered_metadata")
+    def test_cull_lights_quiet_suppresses_progress(self, mock_get_metadata, tmp_path):
+        """Test that cull_lights passes printStatus=False when quiet=True."""
+        source_dir = str(tmp_path / "source")
+        reject_dir = str(tmp_path / "reject")
+
+        mock_get_metadata.return_value = {}
+
+        cull_lights.cull_lights(
+            source_dir=source_dir,
+            reject_dir=reject_dir,
+            max_hfr=2.5,
+            max_rms=None,
+            auto_yes_percent=-1,
+            debug=False,
+            dryrun=False,
+            quiet=True,
+        )
+
+        # Verify get_filtered_metadata was called with printStatus=False
+        call_kwargs = mock_get_metadata.call_args[1]
+        assert call_kwargs["printStatus"] is False
+
+    @patch("ap_common.get_filtered_metadata")
+    def test_cull_lights_not_quiet_shows_progress(self, mock_get_metadata, tmp_path):
+        """Test that cull_lights passes printStatus=True when quiet=False."""
+        source_dir = str(tmp_path / "source")
+        reject_dir = str(tmp_path / "reject")
+
+        mock_get_metadata.return_value = {}
+
+        cull_lights.cull_lights(
+            source_dir=source_dir,
+            reject_dir=reject_dir,
+            max_hfr=2.5,
+            max_rms=None,
+            auto_yes_percent=-1,
+            debug=False,
+            dryrun=False,
+            quiet=False,
+        )
+
+        # Verify get_filtered_metadata was called with printStatus=True
+        call_kwargs = mock_get_metadata.call_args[1]
+        assert call_kwargs["printStatus"] is True
